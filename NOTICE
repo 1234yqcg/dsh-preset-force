@@ -1,0 +1,15 @@
+dsh-preset-force is a community plugin for DeepSeek Harness.
+
+The implementation references the dsh-agent-presets recompose seam and the session event log (agent-presets/session subsystems) of DeepSeek Harness:
+
+  https://github.com/deepseek-ai/deepseek-harness
+  commit 47f943859bef60e4160492346772ded9b24f765a
+
+DeepSeek Harness is distributed under the MIT License:
+
+  Copyright (c) 2026 DeepSeek
+
+The full MIT permission notice is included in this repository's LICENSE file.
+
+DeepSeek and DeepSeek Harness are names of their respective owner. This
+community project is not affiliated with or endorsed by DeepSeek.
