@@ -123,14 +123,14 @@
 
 ## HTTP API
 
-宿主在 `/api/dsh-preset-force` 前缀下注册路由：
+宿主在 `/dsh-preset-force` 前缀下注册路由：
 
 | 方法 | 路径 | 说明 |
 |---|---|---|
 | GET | `/status` | 查询会话当前模式 + 可用列表（`?sessionId=`） |
 | POST | `/switch` | 强制切换会话，请求体 `{"sessionId","preset"}` |
 
-### GET /api/dsh-preset-force/status?sessionId=xxx
+### GET /dsh-preset-force/status?sessionId=xxx
 
 | 参数 | 位置 | 说明 |
 |---|---|---|
@@ -145,7 +145,7 @@
 
 会话不在运行时 `live` 为 `false`，省略 `current`：`{ "ok": true, "live": false, "sessionId": "s-ghost", "available": [ ... ] }`。
 
-### POST /api/dsh-preset-force/switch
+### POST /dsh-preset-force/switch
 
 | 字段 | 类型 | 必填 | 说明 |
 |---|---|---|---|
