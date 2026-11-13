@@ -34,17 +34,26 @@
 
 ## 安装
 
-```bash
-# 在 DSH profile 目录（如 ~/.dsh/profiles/desktop）执行
-pnpm add github:1234yqcg/dsh-preset-force
+```powershell
+# 桌面 App 读的是 desktop profile；CLI `dsh web` 用 --profile web
+dsh plugin --profile desktop add git+https://github.com/1234yqcg/dsh-preset-force.git
 ```
 
-然后在 `package.json` 的 `dsh.profile.bundles` 中加入 `@wasd258/dsh-preset-force`，
-重启 DSH。
+`dsh plugin` 会把参数转给 profile 内的 pnpm，并在安装后自动核对
+`dsh.profile.bundles`——本包声明了 `dsh.bundle.patch`，所以会被自动加入 bundle
+列表。**不需要手工编辑 `package.json`**（早期版本的本文件要求手工追加，那个说法已过时）。
+
+改代码时改用本地目录安装，`lib/*.js` 的改动由客户端 HMR 监视，只需刷新页面：
+
+```powershell
+dsh plugin --profile desktop add file:D:\path\to\dsh-preset-force
+```
 
 ## 注意
 
 - 包名仍是 `@wasd258/dsh-preset-force`，bundle id 无需改动。
-- 如果同时安装了 npm 上的 0.1.2，两者同名，请只保留一个。
+- **不要从 npm 安装**：npm 上只有官方 0.1.2，它缺 `dsh.bundle.patch`、
+  缺 `cordis.patch.yml`、client 注册 id 也不是包名，装上不会加载任何东西。
+  只从本仓库的 git 源安装。
 - 0.1.4 与 0.1.3 的差异仅在 `lib/client.js` 的插槽下拉状态机与文档路由前缀，
   宿主半部 `lib/index.js` 未改动。
