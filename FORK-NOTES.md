@@ -12,7 +12,7 @@
 - **`lib/index.js`**（+42/−6）：新增 `liveSessions()`，向客户端暴露在线会话列表
   （id / 标题 / 状态 / 当前模式），供客户端兜底控件选择；标题字段做了多候选防御式读取。
 - **`lib/client.js`**（+233/−38）：模块注册 id 从 `dsh-preset-force` 改为**包名**
-  `@wasd258/dsh-preset-force`（客户端加载器按包名匹配图谱条目）；加
+  `@1234yqcg/dsh-preset-force`（客户端加载器按包名匹配图谱条目）；加
   `__DSH_PRESET_FORCE_REGISTERED__` 防重复注册；UI 改为复用 DSH 设计变量。
 - **`package.json`**：补 `bundle.patch`；`dsh.client.inject` 由
   `[dsh-client-runtime, dsh-client-ui-slots, dsh-client-ui-conversation]` + `immediately`
@@ -51,7 +51,7 @@ dsh plugin --profile desktop add file:D:\path\to\dsh-preset-force
 
 ## 注意
 
-- 包名仍是 `@wasd258/dsh-preset-force`，bundle id 无需改动。
+- 包名是 `@1234yqcg/dsh-preset-force`（0.1.4 起从上游 `@wasd258` scope 迁出），bundle id 跟随包名。
 - **不要从 npm 安装**：npm 上只有官方 0.1.2，它缺 `dsh.bundle.patch`、
   缺 `cordis.patch.yml`、client 注册 id 也不是包名，装上不会加载任何东西。
   只从本仓库的 git 源安装。
