@@ -20,33 +20,41 @@
 需要带 Web 应用的 DSH profile（`@deepseek-ai/dsh-web-app`）。桌面 App 启动的是
 `desktop` profile，所以桌面用户用 `--profile desktop`；CLI `dsh web` 用 `web`。
 
-> **不要从 npm 安装。** npm 上的 `@wasd258/dsh-preset-force` 停在 `0.1.2`，那个版本
-> **装不出功能**：它没有声明 `dsh.bundle.patch`、包里也没有 `cordis.patch.yml`，客户端
-> bundle 还把注册 id 写成 `dsh-preset-force` 而不是包名。装上只是一个普通依赖，什么都不加载。
-> 本 fork（`0.1.4`）修好了这三处，请**从本仓库安装**。
+> 本包已发布到 npm，名为 `@1234yqcg/dsh-preset-force`（0.1.4+）。
+> 上游的 `@wasd258/dsh-preset-force` 停在 0.1.2，那个版本**装不出功能**：
+> 没有 `dsh.bundle.patch`、没有 `cordis.patch.yml`、client 注册 id 也不对。
+> 请使用下面的新包名。
 
-### 方式 A：从本仓库安装（推荐）
+### 方式 A：从 npm 安装（推荐）
 
 ```powershell
 # 桌面 App
-dsh plugin --profile desktop add git+https://github.com/1234yqcg/dsh-preset-force.git
+dsh plugin --profile desktop add @1234yqcg/dsh-preset-force
 
 # CLI dsh web
-dsh plugin --profile web add git+https://github.com/1234yqcg/dsh-preset-force.git
+dsh plugin --profile web add @1234yqcg/dsh-preset-force
 ```
 
 `dsh plugin` 把参数转给 profile 目录下的 pnpm，随后会自动核对 `dsh.profile.bundles`：
 本包声明了 `dsh.bundle.patch`，因此会被**自动加入** bundle 列表，**无需手工改
 `package.json`**。
 
+### 方式 B：从 git 源安装
+
+效果相同，装的是仓库最新提交而非已发布版本：
+
+```powershell
+dsh plugin --profile desktop add git+https://github.com/1234yqcg/dsh-preset-force.git
+```
+
 等价的手动写法：
 
 ```powershell
 cd "$env:USERPROFILE\.dsh\profiles\desktop"   # 或 $DSH_HOME/profiles/<profile>
-pnpm add git+https://github.com/1234yqcg/dsh-preset-force.git
+pnpm add @1234yqcg/dsh-preset-force
 ```
 
-### 方式 B：从本地目录安装
+### 方式 C：从本地目录安装
 
 改插件代码时用这个（`lib/*.js` 的改动会被客户端 HMR 监视，只需刷新页面）：
 
