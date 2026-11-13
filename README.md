@@ -17,54 +17,59 @@ Force-switch the agent preset (mode) of a DSH session even after it has started 
 
 ## Install
 
-Requires the DSH web profile (`@deepseek-ai/dsh-web-app`).
+Requires a DSH profile with the Web app (`@deepseek-ai/dsh-web-app`). The desktop
+application boots the `desktop` profile, so use `--profile desktop` there; the CLI
+`dsh web` uses `web`.
 
-1. Clone or download this repository:
+> **Do not install from npm.** The npm package `@wasd258/dsh-preset-force` stops at
+> `0.1.2`, which is **not installable**: it declares no `dsh.bundle.patch`, ships no
+> `cordis.patch.yml`, and its client bundle registers itself as `dsh-preset-force`
+> instead of the package name. Installing it yields a package that loads nothing.
+> This fork (`0.1.4`) fixes all three; install it **from this repository**.
 
-   ```powershell
-   git clone https://github.com/WASD258-jpg/dsh-preset-force.git
-   ```
+### Option A: install from this repository (recommended)
 
-2. Install into the DSH profile dependency directory — choose one (on Linux/macOS use `~/.dsh` or `$DSH_HOME` instead of `$env:USERPROFILE\.dsh`):
+```powershell
+# desktop application
+dsh plugin --profile desktop add git+https://github.com/1234yqcg/dsh-preset-force.git
 
-   **Option A: npm install (recommended)**
+# CLI `dsh web`
+dsh plugin --profile web add git+https://github.com/1234yqcg/dsh-preset-force.git
+```
 
-   ```powershell
-   cd "$env:USERPROFILE\.dsh\profiles"
-   npm install @wasd258/dsh-preset-force --no-save
-   ```
+`dsh plugin` forwards its arguments to `pnpm` inside the profile directory and then
+reconciles `dsh.profile.bundles` for you: because this package declares
+`dsh.bundle.patch`, it is added to the bundle list automatically — **no manual edit
+of `package.json` is needed.**
 
-   **Option B: copy from source**
+Equivalent manual form:
 
-   ```powershell
-   $src = '.\dsh-preset-force'
-   $dst = "$env:USERPROFILE\.dsh\profiles\node_modules\@wasd258\dsh-preset-force"
-   New-Item -ItemType Directory -Force -Path "$dst\lib" | Out-Null
-   Copy-Item "$src\package.json" $dst -Force
-   Copy-Item "$src\lib\index.js","$src\lib\client.js" "$dst\lib" -Force
-   Copy-Item "$src\LICENSE","$src\NOTICE" $dst -Force
-   ```
+```powershell
+cd "$env:USERPROFILE\.dsh\profiles\desktop"   # or $DSH_HOME/profiles/<profile>
+pnpm add git+https://github.com/1234yqcg/dsh-preset-force.git
+```
 
-3. Register the package as a bundle of your profile (or run `dsh plugin --profile web add @wasd258/dsh-preset-force`): append the package name to `dsh.profile.bundles` in `$DSH_HOME/profiles/<profile>/package.json`:
+### Option B: install from a local checkout
 
-   ```json
-   {
-     "name": "dsh-profile-web",
-     "private": true,
-     "dependencies": {},
-     "dsh": {
-       "profile": {
-         "bundles": [
-           "@deepseek-ai/dsh-base",
-           "@deepseek-ai/dsh-web-app",
-           "@wasd258/dsh-preset-force"
-         ]
-       }
-     }
-   }
-   ```
+Use this while editing the plugin (`lib/*.js` changes are picked up by the client
+HMR watcher, so only a page refresh is needed):
 
-4. Restart DSH web (or hot-mount the bundle without a restart), then **refresh the browser page** so the client module (`lib/client.js`, loaded immediately on the web platform) is picked up.
+```powershell
+dsh plugin --profile desktop add file:D:\path\to\dsh-preset-force
+```
+
+### Verify
+
+Restart DSH once (a changed bundle is hot-published after that), then **refresh the
+browser page** so the client module is picked up. The host half exposes its routes at
+`/dsh-preset-force`, so a plain GET is enough to confirm the plugin mounted:
+
+```powershell
+Invoke-WebRequest http://127.0.0.1:<web-port>/dsh-preset-force/status -UseBasicParsing
+```
+
+A JSON body with `"ok": true` and an `available` roster means the host half is live;
+the composer dropdown appearing next to the model picker means the client half loaded.
 
 ## Usage
 
@@ -120,10 +125,15 @@ Result shape: `{ ok, from?, to?, unchanged?, available?, error? }`.
 A compact selector in the input tool row (`conversation.input.right` slot, order 10, label "模式切换"), next to the model picker:
 
 1. Open it — every available mode is listed as `name (id)`.
-2. Pick one; the session switches immediately.
+2. Pick one; the session switches immediately and the selector shows the new mode right away.
 3. On failure a browser alert shows the reason and the selection snaps back.
 
-It polls `/status` every 5 seconds (changes from any entry point are reflected) and is disabled while a switch is in flight, when the session is not live, or when no presets are installed (a single disabled "模式" entry).
+It polls `/status` every 5 seconds (so changes made through any entry point are reflected within one cycle) and is disabled while a switch is in flight, when the session is not live, or when no presets are installed (a single disabled "模式" entry).
+
+When the slot system is unavailable (for example inside the desktop shell), the
+plugin falls back to a plain-DOM control anchored next to the composer. That
+fallback additionally shows a session picker whenever more than one top-level
+session is running.
 
 ## HTTP API
 
@@ -196,7 +206,8 @@ If the session is not running, `live` is `false` and `current` is omitted: `{ "o
 
 ## Compatibility
 
-- DeepSeek Harness web profile, at the bundle-interface era of commit [`47f9438`](https://github.com/deepseek-ai/deepseek-harness/tree/47f943859bef60e4160492346772ded9b24f765a)
+- DSH Web profile bundles (`@deepseek-ai/dsh-web-app`); both the desktop application and the CLI `dsh web` work
+- Preset ids used in examples (`standard` / `minimal` / `code` / `cordis`) come from the stock DSH roster; a profile may define a different set — `/preset list` prints whatever is actually installed
 - Node.js >= 22.19.0 (`package.json` `engines`)
 
 Notes:
