@@ -18,6 +18,20 @@
   `[dsh-client-runtime, dsh-client-ui-slots, dsh-client-ui-conversation]` + `immediately`
   收窄为只 `dsh-client-ui-slots`；版本号改为 `0.1.3`。
 
+## 0.1.4 变更
+
+- **`lib/client.js` 修复「首次切换后下拉文字不更新」**：插槽版下拉的 `refresh()`
+  原先用
+  `setPicked((p) => (p && available.some((a) => a.id === p) ? p : data.current || ""))`，
+  只要旧值仍是合法 id 就永不采纳服务端返回的 `current`，导致切换成功后显示滞后一步，
+  必须再点一次（走 `id === state.current` 的 guard）才刷新。现改为无条件采纳
+  `data.current`，失败路径仍显式回滚到 `state.current`；同时用 `busyRef` 做 `busy`
+  的同步镜像（轮询与 `onChange` 都会读到陈旧闭包），并把 `busyRef` 复位提前到
+  `refresh` 的所有返回路径之前，避免 `ok:false` 时控件永久禁用。
+- **`README.md` / `README.zh-CN.md`**：HTTP 路由前缀由 `/api/dsh-preset-force`
+  更正为 `/dsh-preset-force`，与 `lib/index.js` 中 `webServer.register({ path: "/dsh-preset-force" })`
+  的实际注册保持一致（旧文档里的路径会直接 404）。
+
 ## 安装
 
 ```bash
@@ -32,3 +46,5 @@ pnpm add github:1234yqcg/dsh-preset-force
 
 - 包名仍是 `@wasd258/dsh-preset-force`，bundle id 无需改动。
 - 如果同时安装了 npm 上的 0.1.2，两者同名，请只保留一个。
+- 0.1.4 与 0.1.3 的差异仅在 `lib/client.js` 的插槽下拉状态机与文档路由前缀，
+  宿主半部 `lib/index.js` 未改动。
