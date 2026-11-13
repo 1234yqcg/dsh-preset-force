@@ -21,20 +21,20 @@ Requires a DSH profile with the Web app (`@deepseek-ai/dsh-web-app`). The deskto
 application boots the `desktop` profile, so use `--profile desktop` there; the CLI
 `dsh web` uses `web`.
 
-> **Do not install from npm.** The npm package `@wasd258/dsh-preset-force` stops at
-> `0.1.2`, which is **not installable**: it declares no `dsh.bundle.patch`, ships no
-> `cordis.patch.yml`, and its client bundle registers itself as `dsh-preset-force`
-> instead of the package name. Installing it yields a package that loads nothing.
-> This fork (`0.1.4`) fixes all three; install it **from this repository**.
+> This package is published to npm as `@1234yqcg/dsh-preset-force` (0.1.4+). The
+> upstream `@wasd258/dsh-preset-force` stops at 0.1.2 and is **not installable**:
+> it declares no `dsh.bundle.patch`, ships no `cordis.patch.yml`, and registers its
+> client bundle under the wrong id, so installing it loads nothing. Use the scope
+> below.
 
-### Option A: install from this repository (recommended)
+### Option A: install from npm (recommended)
 
 ```powershell
 # desktop application
-dsh plugin --profile desktop add git+https://github.com/1234yqcg/dsh-preset-force.git
+dsh plugin --profile desktop add @1234yqcg/dsh-preset-force
 
 # CLI `dsh web`
-dsh plugin --profile web add git+https://github.com/1234yqcg/dsh-preset-force.git
+dsh plugin --profile web add @1234yqcg/dsh-preset-force
 ```
 
 `dsh plugin` forwards its arguments to `pnpm` inside the profile directory and then
@@ -42,14 +42,22 @@ reconciles `dsh.profile.bundles` for you: because this package declares
 `dsh.bundle.patch`, it is added to the bundle list automatically — **no manual edit
 of `package.json` is needed.**
 
+### Option B: install from git
+
+Same result, tracks the repository head instead of a published tag:
+
+```powershell
+dsh plugin --profile desktop add git+https://github.com/1234yqcg/dsh-preset-force.git
+```
+
 Equivalent manual form:
 
 ```powershell
 cd "$env:USERPROFILE\.dsh\profiles\desktop"   # or $DSH_HOME/profiles/<profile>
-pnpm add git+https://github.com/1234yqcg/dsh-preset-force.git
+pnpm add @1234yqcg/dsh-preset-force
 ```
 
-### Option B: install from a local checkout
+### Option C: install from a local checkout
 
 Use this while editing the plugin (`lib/*.js` changes are picked up by the client
 HMR watcher, so only a page refresh is needed):
