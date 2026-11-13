@@ -1,6 +1,6 @@
 {
   "name": "@wasd258/dsh-preset-force",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "Force-switch the agent preset (mode) of a DSH session after it has started, bypassing the blank-only lock. 会话模式强切插件：绕过「仅空白会话可切换」锁定，随时强制切换当前会话的模式。",
   "type": "module",
   "main": "lib/index.js",
