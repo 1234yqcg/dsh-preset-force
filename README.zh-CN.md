@@ -17,54 +17,53 @@
 
 ## 安装
 
-需要 DSH web profile（`@deepseek-ai/dsh-web-app`）。
+需要带 Web 应用的 DSH profile（`@deepseek-ai/dsh-web-app`）。桌面 App 启动的是
+`desktop` profile，所以桌面用户用 `--profile desktop`；CLI `dsh web` 用 `web`。
 
-1. 克隆或下载本仓库：
+> **不要从 npm 安装。** npm 上的 `@wasd258/dsh-preset-force` 停在 `0.1.2`，那个版本
+> **装不出功能**：它没有声明 `dsh.bundle.patch`、包里也没有 `cordis.patch.yml`，客户端
+> bundle 还把注册 id 写成 `dsh-preset-force` 而不是包名。装上只是一个普通依赖，什么都不加载。
+> 本 fork（`0.1.4`）修好了这三处，请**从本仓库安装**。
 
-   ```powershell
-   git clone https://github.com/WASD258-jpg/dsh-preset-force.git
-   ```
+### 方式 A：从本仓库安装（推荐）
 
-2. 安装进 DSH profile 依赖目录（二选一；Linux/macOS 用 `~/.dsh` 或 `$DSH_HOME` 替代 `$env:USERPROFILE\.dsh`）：
+```powershell
+# 桌面 App
+dsh plugin --profile desktop add git+https://github.com/1234yqcg/dsh-preset-force.git
 
-   **Option A：npm 安装（推荐）**
+# CLI dsh web
+dsh plugin --profile web add git+https://github.com/1234yqcg/dsh-preset-force.git
+```
 
-   ```powershell
-   cd "$env:USERPROFILE\.dsh\profiles"
-   npm install @wasd258/dsh-preset-force --no-save
-   ```
+`dsh plugin` 把参数转给 profile 目录下的 pnpm，随后会自动核对 `dsh.profile.bundles`：
+本包声明了 `dsh.bundle.patch`，因此会被**自动加入** bundle 列表，**无需手工改
+`package.json`**。
 
-   **Option B：从源码复制**
+等价的手动写法：
 
-   ```powershell
-   $src = '.\dsh-preset-force'
-   $dst = "$env:USERPROFILE\.dsh\profiles\node_modules\@wasd258\dsh-preset-force"
-   New-Item -ItemType Directory -Force -Path "$dst\lib" | Out-Null
-   Copy-Item "$src\package.json" $dst -Force
-   Copy-Item "$src\lib\index.js","$src\lib\client.js" "$dst\lib" -Force
-   Copy-Item "$src\LICENSE","$src\NOTICE" $dst -Force
-   ```
+```powershell
+cd "$env:USERPROFILE\.dsh\profiles\desktop"   # 或 $DSH_HOME/profiles/<profile>
+pnpm add git+https://github.com/1234yqcg/dsh-preset-force.git
+```
 
-3. 把包注册为 profile 的 bundle（或运行 `dsh plugin --profile web add @wasd258/dsh-preset-force`）：在 `$DSH_HOME/profiles/<profile>/package.json` 的 `dsh.profile.bundles` 数组追加包名：
+### 方式 B：从本地目录安装
 
-   ```json
-   {
-     "name": "dsh-profile-web",
-     "private": true,
-     "dependencies": {},
-     "dsh": {
-       "profile": {
-         "bundles": [
-           "@deepseek-ai/dsh-base",
-           "@deepseek-ai/dsh-web-app",
-           "@wasd258/dsh-preset-force"
-         ]
-       }
-     }
-   }
-   ```
+改插件代码时用这个（`lib/*.js` 的改动会被客户端 HMR 监视，只需刷新页面）：
 
-4. 重启 DSH web（或热装配 bundle，免重启），然后**刷新浏览器页面**，让客户端模块（`lib/client.js`，web 平台立即加载）生效。
+```powershell
+dsh plugin --profile desktop add file:D:\path\to\dsh-preset-force
+```
+
+### 验证
+
+重启一次 DSH（之后 bundle 变更会自动热发布），然后**刷新浏览器页面**。宿主半部的
+路由挂在 `/dsh-preset-force`，发一个 GET 就能确认插件已挂载：
+
+```powershell
+Invoke-WebRequest http://127.0.0.1:<web-port>/dsh-preset-force/status -UseBasicParsing
+```
+
+返回 `"ok": true` 和 `available` 列表 → 宿主半部正常；输入框旁出现模式下拉 → 客户端半部已加载。
 
 ## 使用
 
@@ -116,10 +115,13 @@
 紧凑模式选择器位于输入工具行（`conversation.input.right` 槽位，order 10，标签「模式切换」），紧挨模型选择器：
 
 1. 点开下拉，所有可用模式以 `名称 (id)` 形式列出。
-2. 选中即切换，立即生效。
+2. 选中即切换，立即生效，下拉会马上显示新模式。
 3. 失败时弹出浏览器提示，并回退到原模式。
 
-下拉每 5 秒轮询一次 `/status`（任何入口导致的模式变化都会反映出来）；切换进行中、会话不在运行、或未装配 presets 时禁用（无 presets 时显示一个禁用的「模式」项）。
+下拉每 5 秒轮询一次 `/status`（任何入口导致的模式变化都会在一个周期内反映出来）；切换进行中、会话不在运行、或未装配 presets 时禁用（无 presets 时显示一个禁用的「模式」项）。
+
+插槽体系不可用时（例如桌面 App 外壳内），插件会退化为一个锚定在输入框旁的纯 DOM
+控件；该兜底控件在存在多个顶层会话时会额外提供一个会话选择器。
 
 ## HTTP API
 
@@ -192,7 +194,8 @@
 
 ## 兼容性
 
-- DeepSeek Harness web profile，官方仓库 commit [`47f9438`](https://github.com/deepseek-ai/deepseek-harness/tree/47f943859bef60e4160492346772ded9b24f765a) 时代的 bundle 接口
+- DSH Web profile bundle（`@deepseek-ai/dsh-web-app`）；桌面 App 与 CLI `dsh web` 均可用
+- 示例中的 preset id（`standard` / `minimal` / `code` / `cordis`）取自 DSH 默认 roster；不同 profile 可能定义不同集合 —— 用 `/preset list` 查看实际已安装的模式
 - Node.js >= 22.19.0（`package.json` `engines`）
 
 注意事项：
