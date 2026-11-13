@@ -127,14 +127,14 @@ It polls `/status` every 5 seconds (changes from any entry point are reflected) 
 
 ## HTTP API
 
-Host routes under `/api/dsh-preset-force`:
+Host routes under `/dsh-preset-force`:
 
 | Method | Path | Description |
 |---|---|---|
 | GET | `/status` | current preset + roster for a session (`?sessionId=`) |
 | POST | `/switch` | force-switch a session, body `{"sessionId","preset"}` |
 
-### GET /api/dsh-preset-force/status?sessionId=xxx
+### GET /dsh-preset-force/status?sessionId=xxx
 
 | Parameter | Location | Description |
 |---|---|---|
@@ -149,7 +149,7 @@ Response — `current` = composed preset id, each `available` entry is `{ id, na
 
 If the session is not running, `live` is `false` and `current` is omitted: `{ "ok": true, "live": false, "sessionId": "s-ghost", "available": [ ... ] }`.
 
-### POST /api/dsh-preset-force/switch
+### POST /dsh-preset-force/switch
 
 | Field | Type | Required | Description |
 |---|---|---|---|
